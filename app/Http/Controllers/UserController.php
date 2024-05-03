@@ -64,21 +64,32 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function update(UserUpdateRequest $request) {
+    public function update(UserUpdateRequest $request)
+    {
         $data = $request->validated();
 
         $user = Auth::user();
 
-        if(isset($data["name"])) {
+        if (isset($data["name"])) {
             $user->name = $data["name"];
         }
 
-        if(isset($data["password"])) {
+        if (isset($data["password"])) {
             $user->password = Hash::make($data["password"]);
         }
 
         $user->save();
 
         return new UserResource($user);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        $user->token = null;
+        $user->save();
+
+        return response()->json(["data" => true])->setStatusCode(200);
     }
 }
