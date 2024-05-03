@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -34,12 +35,13 @@ class UserController extends Controller
         return (new UserResource($user))->response()->setStatusCode(201);
     }
 
-    public function login(UserLoginRequest $request) {
+    public function login(UserLoginRequest $request)
+    {
         $data = $request->validated();
 
         $user = User::where("username", $data["username"])->first();
 
-        if(!$user || !Hash::check($data["password"], $user->password)) {
+        if (!$user || !Hash::check($data["password"], $user->password)) {
             throw new HttpResponseException(response([
                 "errors" => [
                     "message" => [
@@ -52,6 +54,12 @@ class UserController extends Controller
         $user->token = Str::uuid()->toString();
         $user->save();
 
+        return new UserResource($user);
+    }
+
+    public function get()
+    {
+        $user = Auth::user();
         return new UserResource($user);
     }
 }
