@@ -156,7 +156,6 @@ class UserTest extends TestCase
                     ]
                 ]
             ]);
-
     }
 
     public function testGetInvalidToken()
@@ -173,6 +172,78 @@ class UserTest extends TestCase
                     ]
                 ]
             ]);
+    }
 
+    public function testUpdateName()
+    {
+        $this->seed([UserSeeder::class]);
+        $oldUser = User::where("username", "admin")->first();
+
+        $this->patch(
+            '/api/users/current',
+            [
+                'name' => 'Manager'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'username' => 'admin',
+                    'name' => 'Manager'
+                ]
+            ]);
+
+        $newUser = User::where("username", "admin")->first();
+
+        self::assertNotEquals($oldUser->name, $newUser->name);
+    }
+
+    public function testUpdatePassword()
+    {
+        $this->seed([UserSeeder::class]);
+        $oldUser = User::where("username", "admin")->first();
+
+        $this->patch(
+            '/api/users/current',
+            [
+                'password' => 'rahasiadong'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'username' => 'admin',
+                    'name' => 'Admin Cuy'
+                ]
+            ]);
+
+        $newUser = User::where("username", "admin")->first();
+
+        self::assertNotEquals($oldUser->password, $newUser->password);
+    }
+
+    public function testUpdateFailed()
+    {
+        $this->seed([UserSeeder::class]);
+
+        $this->patch('/api/users/current',
+            [
+                'name' => 'EkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEkoEko'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(400)
+            ->assertJson([
+                'errors' => [
+                    'name' => [
+                        "The name field must not be greater than 100 characters."
+                    ]
+                ]
+            ]);
     }
 }
