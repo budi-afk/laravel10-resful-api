@@ -125,4 +125,83 @@ class AddressTest extends TestCase
                 ]
             ]);
     }
+
+    public function testUpdateSuccess()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+        $address = Address::query()->limit(1)->first();
+
+        $this->put(
+            '/api/contacts/' . $address->contact_id . '/addresses/' . $address->id,
+            [
+                'street' => 'update_street',
+                'city' => 'update_city',
+                'province' => 'update_province',
+                'country' => 'update_country',
+                'postal_code' => '22222'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'street' => 'update_street',
+                    'city' => 'update_city',
+                    'province' => 'update_province',
+                    'country' => 'update_country',
+                    'postal_code' => '22222'
+                ]
+            ]);
+    }
+
+    public function testUpdateFailed()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+        $address = Address::query()->limit(1)->first();
+
+        $this->put(
+            '/api/contacts/' . $address->contact_id . '/addresses/' . $address->id,
+            [
+                'street' => '',
+                'city' => 'update_city',
+                'province' => 'update_province',
+                'country' => 'update_country',
+                'postal_code' => '22222'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(400)
+            ->assertJson([
+                'errors' => [
+                    'street' => ['The street field is required.']
+                ]
+            ]);
+    }
+
+    public function testUpdateNotFound()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+        $address = Address::query()->limit(1)->first();
+
+        $this->put(
+            '/api/contacts/' . $address->contact_id . '/addresses/' . ($address->id + 1),
+            [
+                'street' => 'update',
+                'city' => 'update',
+                'province' => 'update',
+                'country' => 'update',
+                'postal_code' => '22222'
+            ],
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['address not found']
+                ]
+            ]);
+    }
 }
