@@ -210,9 +210,9 @@ class AddressTest extends TestCase
         $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
         $address = Address::query()->limit(1)->first();
 
-        $this->delete('/api/contacts/' . $address->contact_id . '/addresses/' . $address->id,
-            [
-            ],
+        $this->delete(
+            '/api/contacts/' . $address->contact_id . '/addresses/' . $address->id,
+            [],
             [
                 'Authorization' => 'test'
             ]
@@ -220,7 +220,6 @@ class AddressTest extends TestCase
             ->assertJson([
                 'data' => true
             ]);
-
     }
 
     public function testDeleteNotFound()
@@ -228,9 +227,9 @@ class AddressTest extends TestCase
         $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
         $address = Address::query()->limit(1)->first();
 
-        $this->delete('/api/contacts/' . $address->contact_id . '/addresses/' . ($address->id + 1),
-            [
-            ],
+        $this->delete(
+            '/api/contacts/' . $address->contact_id . '/addresses/' . ($address->id + 1),
+            [],
             [
                 'Authorization' => 'test'
             ]
@@ -238,6 +237,48 @@ class AddressTest extends TestCase
             ->assertJson([
                 'errors' => [
                     'message' => ['address not found']
+                ]
+            ]);
+    }
+
+    public function testListSuccess()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->get(
+            '/api/contacts/' . $contact->id . '/addresses',
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    [
+                        'street' => 'test_street',
+                        'city' => 'test_city',
+                        'province' => 'test_province',
+                        'country' => 'test_country',
+                        'postal_code' => '11111'
+                    ]
+                ]
+            ]);
+    }
+
+    public function testListContactNotFound()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->get(
+            '/api/contacts/' . ($contact->id + 1) . '/addresses',
+            [
+                'Authorization' => 'test'
+            ]
+        )->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['contact not found']
                 ]
             ]);
     }
