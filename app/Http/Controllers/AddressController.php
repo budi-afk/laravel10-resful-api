@@ -48,7 +48,8 @@ class AddressController extends Controller
         return $address;
     }
 
-    public function create($idContact, AddressCreateRequest $request) {
+    public function create($idContact, AddressCreateRequest $request)
+    {
         $user = Auth::user();
 
         $contact = $this->getContact($user, $idContact);
@@ -88,5 +89,20 @@ class AddressController extends Controller
         $address->update($data);
 
         return new AddressResource($address);
+    }
+
+    public function delete($idContact, $idAddress)
+    {
+        $user = Auth::user();
+
+        $contact = $this->getContact($user, $idContact);
+
+        $address = $this->getAddress($contact, $idAddress);
+
+        $address->delete();
+
+        return response()->json([
+            "data" => true
+        ])->setStatusCode(200);
     }
 }
